@@ -181,3 +181,11 @@ jobs:
           echo -e "\n🌐 Fetching root API..."
           curl -sf http://localhost:8001/
 
+      - name: Dump Kubernetes diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get pods -n taskboard -o wide
+          kubectl describe pods -l app=taskboard-backend -n taskboard
+          kubectl logs -l app=taskboard-backend -n taskboard --all-containers --tail=100 || true
+          kubectl logs -l app=taskboard-backend -n taskboard --all-containers --previous --tail=100 || true
+

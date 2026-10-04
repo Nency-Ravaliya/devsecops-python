@@ -21,8 +21,13 @@ spec:
           ports:
             - containerPort: 8000
           env:
+            # Image runs as non-root (uid 10001) and /app is root-owned,
+            # so SQLite must live on a writable volume.
             - name: DATABASE_URL
-              value: "sqlite:///./taskboard.db"
+              value: "sqlite:////data/taskboard.db"
+          volumeMounts:
+            - name: data
+              mountPath: /data
           readinessProbe:
             httpGet:
               path: /health
@@ -36,6 +41,9 @@ spec:
               port: 8000
             initialDelaySeconds: 20
             periodSeconds: 10
+      volumes:
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
